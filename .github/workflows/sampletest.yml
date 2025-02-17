@@ -1,0 +1,22 @@
+name: Install NPM and Check Ubuntu Version
+
+on:  
+  push:
+    branches:
+      - main
+
+jobs:
+  install-and-check:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Check Runner OS Version
+        run: cat /etc/os-release
+
+      - name: Install npm
+        run: |
+          sudo apt update
+          sudo apt install -y npm
+
+      - name: Verify npm Installation
+        run: npm --version
