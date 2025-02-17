@@ -1,7 +1,6 @@
 name: Install NPM and Check Ubuntu Version
 
 on: [push, pull_request]
-      - main
 jobs:
   install-and-check:
     runs-on: ubuntu-22.04
