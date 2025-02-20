@@ -1,0 +1,43 @@
+name: Fix Missing Zstd Issue
+
+on: [push, pull_request]
+
+jobs:
+  test-windows-zstd:
+    runs-on: windows-latest  # Change to windows-2019 or windows-2022 if needed
+
+    steps:
+      - name: Check if Zstd is Installed
+        shell: pwsh
+        run: |
+          if (Get-Command zstd -ErrorAction SilentlyContinue) {
+            Write-Output "✅ Zstd is installed"
+            zstd -V
+          } else {
+            Write-Output "❌ Zstd is NOT installed. Installing now..."
+            echo "ZSTD_MISSING=true" | Out-File -FilePath $env:GITHUB_ENV -Append
+          }
+
+      - name: Install Zstd if Missing
+        if: env.ZSTD_MISSING == 'true'
+        shell: pwsh
+        run: |
+          choco install zstd -y
+          Write-Output "✅ Zstd Installed Successfully"
+
+      - name: Verify Zstd Installation
+        shell: pwsh
+        run: |
+          if (Get-Command zstd -ErrorAction SilentlyContinue) {
+            Write-Output "✅ Zstd is now installed"
+            zstd -V
+          } else {
+            Write-Output "❌ Zstd installation failed"
+            exit 1
+          }
+
+      - name: Run Tools.Tests.ps1
+        shell: pwsh
+        run: |
+          Write-Output "⚙️ Running test script..."
+          & C:\image\tests\Tools.Tests.ps1
