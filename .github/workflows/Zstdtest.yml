@@ -1,13 +1,14 @@
-name: Fix Missing Zstd Issue
+name: Verify Zstd on Windows Runner
 
 on: [push, pull_request]
 
 jobs:
   test-windows-zstd:
-    runs-on: windows-latest  # Change to windows-2019 or windows-2022 if needed
+    runs-on: windows-latest  # Adjust if needed: windows-2019, windows-2022
 
     steps:
       - name: Check if Zstd is Installed
+        id: check-zstd
         shell: pwsh
         run: |
           if (Get-Command zstd -ErrorAction SilentlyContinue) {
@@ -36,8 +37,14 @@ jobs:
             exit 1
           }
 
-      - name: Run Tools.Tests.ps1
+      - name: Run Only Zstd Test from Tools.Tests.ps1
         shell: pwsh
         run: |
-          Write-Output "⚙️ Running test script..."
-          & C:\image\tests\Tools.Tests.ps1
+          Write-Output "⚙️ Running only Zstd test..."
+          $tests = Invoke-Pester -Script C:\image\tests\Tools.Tests.ps1 -PassThru
+          if ($tests.FailedCount -gt 0) {
+            Write-Output "❌ Some tests failed"
+            exit 1
+          } else {
+            Write-Output "✅ All Zstd tests passed"
+          }
