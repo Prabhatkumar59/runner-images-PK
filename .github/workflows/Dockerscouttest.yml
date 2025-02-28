@@ -1,11 +1,6 @@
 name: Docker Scout Security Scan
 
-on:
-  push:
-    branches:
-      - main
-  workflow_dispatch:
-
+on: [push, pull_request]
 jobs:
   security-scan:
     runs-on: ubuntu-latest-8-cores  # Use a more powerful runner
