@@ -1,0 +1,54 @@
+name: Docker Scout Debug
+
+on: [push, pull_request]
+jobs:
+  security_scan:
+    runs-on: ubuntu-latest-xl  # Use a larger runner
+    timeout-minutes: 30  # Prevent indefinite execution
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Capture initial system state before running Docker Scout
+      - name: Check system memory and disk usage
+        run: |
+          echo "Initial Memory Usage:"
+          free -h
+          echo "Initial Disk Usage:"
+          df -h
+
+      # Ensure Docker is running
+      - name: Check Docker version
+        run: docker version
+
+      # Run Docker Scout scan with logging and memory limits
+      - name: Run Docker Scout with debugging
+        run: |
+          nohup docker scout cves -e techknowlogick/xgo --memory=4g > scout.log 2>&1 &
+          echo "Docker Scout started in background"
+
+      # Wait for some time to capture logs before potential shutdown
+      - name: Wait before checking logs
+        run: sleep 120  # Adjust wait time if needed
+
+      # Capture logs before shutdown
+      - name: Capture system logs before shutdown
+        if: always()
+        run: |
+          echo "Last 50 system logs:"
+          dmesg | tail -n 50
+          echo "Updated Memory Usage:"
+          free -h
+          echo "Updated Disk Usage:"
+          df -h
+          echo "Docker Logs:"
+          cat scout.log || echo "No logs found"
+
+      # Upload logs for further debugging
+      - name: Upload logs for analysis
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: docker-scout-debug-logs
+          path: scout.log
