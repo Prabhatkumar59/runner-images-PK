@@ -1,0 +1,26 @@
+name: Install Mono on Ubuntu
+
+on: [push, pull_request]
+
+jobs:
+  install-mono:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Mono Repository
+        run: |
+          sudo apt update
+          sudo apt install -y ca-certificates gnupg curl
+          sudo mkdir -p /etc/apt/keyrings
+          curl -fsSL https://download.mono-project.com/repo/xamarin.gpg | sudo tee /etc/apt/keyrings/mono-official.asc >/dev/null
+          echo "deb [signed-by=/etc/apt/keyrings/mono-official.asc] https://download.mono-project.com/repo/ubuntu stable-focal main" | sudo tee /etc/apt/sources.list.d/mono-official.list
+
+      - name: Install Mono
+        run: |
+          sudo apt update
+          sudo apt install -y mono-complete
+
+      - name: Verify Mono Installation
+        run: mono --version
