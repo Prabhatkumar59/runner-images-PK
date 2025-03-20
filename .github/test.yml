@@ -1,0 +1,26 @@
+name: JUnit Test on Ubuntu Runners
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Run JUnit Tests
+        run: |
+          mkdir -p test-results
+          javac -cp .:junit-platform-console-standalone-1.9.3.jar ExampleTest.java
+          java -jar junit-platform-console-standalone-1.9.3.jar --class-path . --scan-class-path
