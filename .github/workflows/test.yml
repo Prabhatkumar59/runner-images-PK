@@ -1,0 +1,22 @@
+trigger:
+- main
+
+pool:
+  vmImage: 'windows-2025'
+
+jobs:
+- job: WSL1_Test
+  steps:
+  - script: |
+      echo "Setting WSL default version to 1 (WSL2 is not supported on Azure DevOps agent)"
+      wsl --set-default-version 1
+
+      echo "Installing Ubuntu distribution"
+      wsl --install -d Ubuntu --no-launch
+
+      echo "Waiting for Ubuntu installation to settle..."
+      timeout /t 10
+
+      echo "Running a command inside WSL1 (Ubuntu)"
+      wsl -d Ubuntu uname -a
+    displayName: 'Install Ubuntu with WSL1 and Run Command'
