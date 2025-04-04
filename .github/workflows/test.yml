@@ -1,22 +1,29 @@
-trigger:
-- main
+name: WSL1 Test on windows-2025
 
-pool:
-  vmImage: 'windows-2025'
+on: [push, pull_request]
 
 jobs:
-- job: WSL1_Test
-  steps:
-  - script: |
-      echo "Setting WSL default version to 1 (WSL2 is not supported on Azure DevOps agent)"
-      wsl --set-default-version 1
+  wsl1-job:
+    runs-on: windows-2025
 
-      echo "Installing Ubuntu distribution"
-      wsl --install -d Ubuntu --no-launch
+    steps:
+    - name: Set WSL default version to 1
+      run: |
+        wsl --set-default-version 1
 
-      echo "Waiting for Ubuntu installation to settle..."
-      timeout /t 10
+    - name: Install Ubuntu with WSL1
+      run: |
+        wsl --install -d Ubuntu --no-launch
+        timeout /t 10
 
-      echo "Running a command inside WSL1 (Ubuntu)"
-      wsl -d Ubuntu uname -a
-    displayName: 'Install Ubuntu with WSL1 and Run Command'
+    - name: Verify WSL Version
+      run: |
+        wsl -l -v
+
+    - name: Run script in WSL1 (Ubuntu)
+      run: |
+        wsl -d Ubuntu sh -c "echo 'Inside WSL1'; uname -a; lsb_release -a"
+
+    - name: Install curl and test internet in WSL
+      run: |
+        wsl -d Ubuntu sh -c "sudo apt-get update && sudo apt-get install -y curl && curl -s https://api.github.com"
