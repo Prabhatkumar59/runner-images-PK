@@ -1,8 +1,6 @@
 name: Check Alibaba Cloud CLI Version on Multiple OS
 
-on:
-  workflow_dispatch:
-
+on: [push, pull_request]
 jobs:
   check-aliyun-ubuntu22:
     name: Ubuntu 22.04
