@@ -8,7 +8,7 @@
 Install-Binary `
     -Url 'https://download.microsoft.com/download/0/5/6/056dcda9-d667-4e27-8001-8a0c6971d6b1/vcredist_x64.exe' `
     -InstallArgs @("/install", "/quiet", "/norestart") `
-    -ExpectedSHA256Sum '20E2645B7CD5873B1FA3462B99A665AC8D6E14AAE83DED9D875FEA35FFDD7D7E'
+    -ExpectedSHA256Sum 'AD6E09B62231A7904FD88835EE2300BA2E25A52F73BE8A3B7EC6A87D94EC94A9'
 
 # Downloading mysql
 [version] $mysqlVersion = (Get-ToolsetContent).mysql.version
