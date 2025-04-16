@@ -1,0 +1,48 @@
+name: Debug DACFx Installation
+
+on: [push, pull_request]
+
+  
+jobs:
+  test-dacfx:
+    runs-on: windows-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Create temporary directory
+        run: |
+          mkdir D:\temp
+
+      - name: Download DACFx Installer
+        run: |
+          $dacfxUrl = "https://aka.ms/dacfx-msi"
+          $tempFile = "D:\temp\dacfx-installer.msi"
+          Write-Host "Downloading DACFx from $dacfxUrl..."
+          Invoke-WebRequest -Uri $dacfxUrl -OutFile $tempFile
+          if (-Not (Test-Path $tempFile)) {
+              throw "DACFx installer was not downloaded successfully."
+          }
+        shell: pwsh
+
+      - name: Install DACFx
+        run: |
+          $tempFile = "D:\temp\dacfx-installer.msi"
+          Write-Host "Installing DACFx from $tempFile..."
+          Start-Process -FilePath "msiexec.exe" -ArgumentList "/i $tempFile /quiet /norestart" -NoNewWindow -Wait
+        shell: pwsh
+
+      - name: Verify DACFx Installation
+        run: |
+          if (-Not (Get-Command sqlpackage -ErrorAction SilentlyContinue)) {
+              throw "DACFx installation failed. 'sqlpackage' command not found."
+          } else {
+              Write-Host "DACFx installed successfully."
+          }
+        shell: pwsh
+
+      - name: Clean up temporary files
+        run: |
+          Remove-Item -Path D:\temp -Recurse -Force
+        shell: pwsh
