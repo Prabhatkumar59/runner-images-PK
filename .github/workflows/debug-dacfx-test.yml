@@ -1,8 +1,8 @@
 name: Debug DACFx Installation
 
 on: [push, pull_request]
-
   
+
 jobs:
   test-dacfx:
     runs-on: windows-latest
@@ -30,10 +30,28 @@ jobs:
         run: |
           $tempFile = "D:\temp\dacfx-installer.msi"
           Write-Host "Installing DACFx from $tempFile..."
-          Start-Process -FilePath "msiexec.exe" -ArgumentList "/i $tempFile /quiet /norestart" -NoNewWindow -Wait
+          Start-Process -FilePath "msiexec.exe" -ArgumentList "/i $tempFile /quiet /norestart /log D:\temp\dacfx-install.log" -NoNewWindow -Wait
+          Write-Host "DACFx installation completed."
         shell: pwsh
 
-      - name: Verify DACFx Installation
+      - name: Verify DACFx Installation Directory
+        run: |
+          $dacfxPath = "C:\Program Files\Microsoft SQL Server\160\DAC\bin\sqlpackage.exe"
+          if (-Not (Test-Path $dacfxPath)) {
+              throw "sqlpackage.exe not found in the expected installation directory: $dacfxPath"
+          } else {
+              Write-Host "sqlpackage.exe found in $dacfxPath"
+          }
+        shell: pwsh
+
+      - name: Add DACFx to PATH
+        run: |
+          $dacfxPath = "C:\Program Files\Microsoft SQL Server\160\DAC\bin"
+          [System.Environment]::SetEnvironmentVariable("PATH", $dacfxPath + ";" + $env:PATH, [System.EnvironmentVariableTarget]::Process)
+          Write-Host "Added DACFx to PATH: $dacfxPath"
+        shell: pwsh
+
+      - name: Verify DACFx Command
         run: |
           if (-Not (Get-Command sqlpackage -ErrorAction SilentlyContinue)) {
               throw "DACFx installation failed. 'sqlpackage' command not found."
