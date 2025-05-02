@@ -8,30 +8,31 @@ jobs:
 
     steps:
       - name: Add Ninja to PATH
-        run: echo "C:\Program Files\Ninja" >> $env:GITHUB_PATH
-        shell: pwsh
+        run: echo "C:\Program Files\Ninja" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
       - name: Check Ninja version
         run: ninja --version
 
       - name: Create minimal C++ project
         run: |
-          mkdir test-project
-          cd test-project
-          echo int main\(\) { return 0; } > main.cpp
-          echo cmake_minimum_required\(VERSION 3.10\) > CMakeLists.txt
-          echo project\(TestNinja\) >> CMakeLists.txt
-          echo add_executable\(testapp main.cpp\) >> CMakeLists.txt
-        shell: cmd
+          New-Item -ItemType Directory -Path test-project
+          Set-Location test-project
+          "int main() { return 0; }" | Out-File -FilePath main.cpp -Encoding utf8
+          @'
+cmake_minimum_required(VERSION 3.10)
+project(TestNinja)
+add_executable(testapp main.cpp)
+'@ | Out-File -FilePath CMakeLists.txt -Encoding utf8
+        shell: pwsh
 
       - name: Configure using CMake + Ninja
         run: |
           cd test-project
-          cmake -G Ninja .
-        shell: cmd
+          cmake -G "Ninja" .
+        shell: pwsh
 
       - name: Build using Ninja
         run: |
           cd test-project
           ninja
-        shell: cmd
+        shell: pwsh
