@@ -1,32 +1,28 @@
-      - task: AzureCLI@2
-        displayName: 'Generate Image'
-        inputs:
-          workingDirectory: '$(Agent.BuildDirectory)/s/runner-images'
-          scriptLocation: 'inlineScript'
-          scriptType: 'pscore'
-          azureSubscription: <service connection using managed identity>    <This we changed as we switched from SP to MI>
-          addSpnToEnvironment: true
-          inlineScript: |
-            $env:VNET_RESOURCE_GROUP = <network Group>
-            $env:VNET_NAME =<vnet name>
-            $env:VNET_SUBNET = <subnet name>
-            
-            Import-Module ./helpers/GenerateResourcesAndImage.ps1
-            $PSNativeCommandArgumentPassing = 'Legacy'
-            
-            $CreateImageParams = @{
-              ImageType = '${{ parameters.image_type }}'
-              SubscriptionId = '$(subscription_id)'
-              ResourceGroupName = '${{ parameters.resource_group }}'
-              AzureLocation = '${{ parameters.location }}'
-              AzureClientId = $env:servicePrincipalId
-              AzureClientSecret = $env:servicePrincipalKey
-              AzureTenantId = $env:tenantId
-              Force = $True
-              OnError = '${{ parameters.on_error }}'
-              Tags = @{
-                ExcludeMdeAutoProvisioning = $True
-              }
-            }
-            
-            GenerateResourcesAndImage @CreateImageParams
+- task: AzureCLI@2
+  displayName: 'Generate Image'
+  inputs:
+    workingDirectory: '$(Agent.BuildDirectory)/s/runner-images'
+    scriptLocation: 'inlineScript'
+    scriptType: 'pscore'
+    azureSubscription: <service connection using managed identity>
+    addSpnToEnvironment: true
+    inlineScript: |
+      $env:VNET_RESOURCE_GROUP = <network Group>
+      $env:VNET_NAME = <vnet name>
+      $env:VNET_SUBNET = <subnet name>
+
+      Import-Module ./helpers/GenerateResourcesAndImage.ps1
+      $PSNativeCommandArgumentPassing = 'Legacy'
+
+      $CreateImageParams = @{
+        ImageType = '${{ parameters.image_type }}'
+        SubscriptionId = '$(subscription_id)'
+        ResourceGroupName = '${{ parameters.resource_group }}'
+        AzureLocation = '${{ parameters.location }}'
+        OnError = '${{ parameters.on_error }}'
+        Tags = @{
+          ExcludeMdeAutoProvisioning = $True
+        }
+      }
+
+      GenerateResourcesAndImage @CreateImageParams
