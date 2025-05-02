@@ -1,46 +1,33 @@
-name: Test Ninja with CMake on Windows 2022
-
 on: [push, pull_request]
 
-jobs:
-  build:
-    runs-on: windows-2022
+parameters:
+  - name: repoDirectory
+    type: string
+    default: $(Build.SourcesDirectory)
 
-    steps:
-      - name: Add Ninja to PATH
-        shell: pwsh
-        run: |
-          echo "C:\Program Files\Ninja" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+steps:
+  - task: Cache@2
+    inputs:
+      key: "1-12-1 | ninjaKey"
+      restoreKeys: ninjaKey
+      path: $(Agent.TempDirectory)/ninja
+      cacheHitVar: NINJA_CACHE_RESTORED
+    displayName: Cache Ninja
 
-      - name: Check Ninja version
-        run: ninja --version
-        shell: pwsh
+  - task: PowerShell@2
+    condition: ne(variables.NINJA_CACHE_RESTORED, 'true')
+    displayName: Download Ninja
+    inputs:
+      targetType: "filePath"
+      filePath: '${{ parameters.repoDirectory }}\install-scripts\install-ninja.ps1'
+      failOnStderr: true
 
-      - name: Create C++ project and CMake config
-        shell: pwsh
-        run: |
-          New-Item -ItemType Directory -Path test-project
-          
-          @'
-int main() {
-    return 0;
-}
-'@ | Set-Content -Path test-project\main.cpp -Encoding utf8
+  - task: ExtractFiles@1
+    inputs:
+      archiveFilePatterns: '$(Agent.TempDirectory)\ninja.zip'
+      destinationFolder: '$(Agent.TempDirectory)\ninja'
+    condition: ne(variables.NINJA_CACHE_RESTORED, 'true')
+    displayName: Extract Ninja
 
-          @'
-cmake_minimum_required(VERSION 3.10)
-project(TestNinja)
-add_executable(testapp main.cpp)
-'@ | Set-Content -Path test-project\CMakeLists.txt -Encoding utf8
-
-      - name: Configure using CMake + Ninja
-        shell: pwsh
-        run: |
-          cd test-project
-          cmake -G "Ninja" .
-
-      - name: Build using Ninja
-        shell: pwsh
-        run: |
-          cd test-project
-          ninja
+  - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\ninja"
+    displayName: Tweak PATH with Ninja
