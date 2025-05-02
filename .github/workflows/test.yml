@@ -1,28 +1,42 @@
-- task: AzureCLI@2
-  displayName: 'Generate Image'
-  inputs:
-    workingDirectory: '$(Agent.BuildDirectory)/s/runner-images'
-    scriptLocation: 'inlineScript'
-    scriptType: 'pscore'
-    azureSubscription: <service connection using managed identity>
-    addSpnToEnvironment: true
-    inlineScript: |
-      $env:VNET_RESOURCE_GROUP = <network Group>
-      $env:VNET_NAME = <vnet name>
-      $env:VNET_SUBNET = <subnet name>
+name: Test GenerateResourcesAndImage
 
-      Import-Module ./helpers/GenerateResourcesAndImage.ps1
-      $PSNativeCommandArgumentPassing = 'Legacy'
+on:[push, pull_request]
+jobs:
+  generate-image:
+    runs-on: windows-2022
 
-      $CreateImageParams = @{
-        ImageType = '${{ parameters.image_type }}'
-        SubscriptionId = '$(subscription_id)'
-        ResourceGroupName = '${{ parameters.resource_group }}'
-        AzureLocation = '${{ parameters.location }}'
-        OnError = '${{ parameters.on_error }}'
-        Tags = @{
-          ExcludeMdeAutoProvisioning = $True
-        }
-      }
+    steps:
+      - name: Checkout runner-images repo
+        uses: actions/checkout@v4
 
-      GenerateResourcesAndImage @CreateImageParams
+      - name: Set up Azure CLI
+        uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Generate Image
+        shell: pwsh
+        run: |
+          $env:VNET_RESOURCE_GROUP = '<your-network-rg>'
+          $env:VNET_NAME = '<your-vnet-name>'
+          $env:VNET_SUBNET = '<your-subnet-name>'
+
+          Import-Module ./helpers/GenerateResourcesAndImage.ps1
+
+          $CreateImageParams = @{
+            ImageType = 'ubuntu2204'   # adjust as needed
+            SubscriptionId = '${{ secrets.AZURE_SUBSCRIPTION_ID }}'
+            ResourceGroupName = '<your-resource-group>'
+            AzureLocation = 'eastus'   # or your region
+            AzureClientId = 'placeholder'
+            AzureClientSecret = 'placeholder'
+            AzureTenantId = 'placeholder'
+            OnError = 'Continue'
+            Tags = @{
+              ExcludeMdeAutoProvisioning = $true
+            }
+          }
+
+          GenerateResourcesAndImage @CreateImageParams
