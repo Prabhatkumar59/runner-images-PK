@@ -13,9 +13,10 @@ jobs:
       - name: Azure Login (Managed Identity)
         uses: azure/login@v1
         with:
-          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}       # User-assigned MI client ID
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+          auth-type: IDENTITY                              # ✅ Explicitly specify Managed Identity
 
       - name: Generate Windows 2022 Image
         shell: pwsh
@@ -31,9 +32,9 @@ jobs:
             SubscriptionId = '${{ secrets.AZURE_SUBSCRIPTION_ID }}'
             ResourceGroupName = '<your-resource-group>'
             AzureLocation = 'eastus'
-            AzureClientId = 'dummy-client-id'        # required by script
-            AzureClientSecret = 'dummy-client-secret'
-            AzureTenantId = 'dummy-tenant-id'
+            AzureClientId = 'placeholder'
+            AzureClientSecret = 'placeholder'
+            AzureTenantId = 'placeholder'
             OnError = 'Continue'
             Tags = @{
               ExcludeMdeAutoProvisioning = $true
