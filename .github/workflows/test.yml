@@ -1,9 +1,9 @@
-name: Test Ninja on Windows 2022
+name: Test Ninja with CMake on Windows 2022
 
 on: [push, pull_request]
 
 jobs:
-  ninja-cmake-test:
+  build:
     runs-on: windows-2022
 
     steps:
@@ -24,13 +24,13 @@ jobs:
           echo add_executable\(testapp main.cpp\) >> CMakeLists.txt
         shell: cmd
 
-      - name: Configure with CMake using Ninja
+      - name: Configure using CMake + Ninja
         run: |
           cd test-project
           cmake -G Ninja .
         shell: cmd
 
-      - name: Build with Ninja
+      - name: Build using Ninja
         run: |
           cd test-project
           ninja
