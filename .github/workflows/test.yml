@@ -1,36 +1,16 @@
+name: Ninja Version Check
+
 on: [push, pull_request]
 
-parameters:
-  - name: repoDirectory
-    type: string
-    default: $(Build.SourcesDirectory)
+jobs:
+  check-ninja-version:
+    runs-on: windows-2022
 
-steps:
-  - task: Cache@2
-    inputs:
-      key: "1-12-1 | ninjaKey"
-      restoreKeys: ninjaKey
-      path: $(Agent.TempDirectory)/ninja
-      cacheHitVar: NINJA_CACHE_RESTORED
-    displayName: Cache Ninja
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
-  - task: PowerShell@2
-    condition: ne(variables.NINJA_CACHE_RESTORED, 'true')
-    displayName: Download Ninja
-    inputs:
-      targetType: "filePath"
-      filePath: '${{ parameters.repoDirectory }}\install-scripts\install-ninja.ps1'
-      failOnStderr: true
-
-  - task: ExtractFiles@1
-    inputs:
-      archiveFilePatterns: '$(Agent.TempDirectory)\ninja.zip'
-      destinationFolder: '$(Agent.TempDirectory)\ninja'
-    condition: ne(variables.NINJA_CACHE_RESTORED, 'true')
-    displayName: Extract Ninja
-
-  - script: echo "##vso[task.prependpath]$(Agent.TempDirectory)\ninja"
-    displayName: Tweak PATH with Ninja
-- script: |
-    dir "$(Agent.TempDirectory)\ninja"
-  displayName: Check Ninja Directory
+      - name: Ninja Version Check
+        run: |
+          ninja --version
+          displayName: Ninja Version Check
