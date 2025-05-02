@@ -1,22 +1,23 @@
-name: Test GenerateResourcesAndImage
+name: Test Windows 2022 Image Generation
 
-on:[push, pull_request]
+on: [push, pull_request]
+
 jobs:
-  generate-image:
+  generate-windows22:
     runs-on: windows-2022
 
     steps:
       - name: Checkout runner-images repo
         uses: actions/checkout@v4
 
-      - name: Set up Azure CLI
+      - name: Azure Login (Managed Identity)
         uses: azure/login@v1
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Generate Image
+      - name: Generate Windows 2022 Image
         shell: pwsh
         run: |
           $env:VNET_RESOURCE_GROUP = '<your-network-rg>'
@@ -26,13 +27,13 @@ jobs:
           Import-Module ./helpers/GenerateResourcesAndImage.ps1
 
           $CreateImageParams = @{
-            ImageType = 'ubuntu2204'   # adjust as needed
+            ImageType = 'windows2022'
             SubscriptionId = '${{ secrets.AZURE_SUBSCRIPTION_ID }}'
             ResourceGroupName = '<your-resource-group>'
-            AzureLocation = 'eastus'   # or your region
-            AzureClientId = 'placeholder'
-            AzureClientSecret = 'placeholder'
-            AzureTenantId = 'placeholder'
+            AzureLocation = 'eastus'
+            AzureClientId = 'dummy-client-id'        # required by script
+            AzureClientSecret = 'dummy-client-secret'
+            AzureTenantId = 'dummy-tenant-id'
             OnError = 'Continue'
             Tags = @{
               ExcludeMdeAutoProvisioning = $true
