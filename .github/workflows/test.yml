@@ -1,0 +1,37 @@
+name: Test Ninja on Windows 2022
+
+on: [push, pull_request]
+
+jobs:
+  ninja-cmake-test:
+    runs-on: windows-2022
+
+    steps:
+      - name: Add Ninja to PATH
+        run: echo "C:\Program Files\Ninja" >> $env:GITHUB_PATH
+        shell: pwsh
+
+      - name: Check Ninja version
+        run: ninja --version
+
+      - name: Create minimal C++ project
+        run: |
+          mkdir test-project
+          cd test-project
+          echo int main\(\) { return 0; } > main.cpp
+          echo cmake_minimum_required\(VERSION 3.10\) > CMakeLists.txt
+          echo project\(TestNinja\) >> CMakeLists.txt
+          echo add_executable\(testapp main.cpp\) >> CMakeLists.txt
+        shell: cmd
+
+      - name: Configure with CMake using Ninja
+        run: |
+          cd test-project
+          cmake -G Ninja .
+        shell: cmd
+
+      - name: Build with Ninja
+        run: |
+          cd test-project
+          ninja
+        shell: cmd
