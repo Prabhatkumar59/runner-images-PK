@@ -1,16 +1,42 @@
-name: Ninja Version Check
+name: Ninja Path Test
 
 on: [push, pull_request]
 
 jobs:
-  check-ninja-version:
+  test-ninja:
     runs-on: windows-2022
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+    - name: Check Ninja from PATH
+      run: |
+        echo Trying to run ninja from PATH...
+        ninja --version
+      continue-on-error: true
 
-      - name: Ninja Version Check
-        run: |
-          ninja --version
-          displayName: Ninja Version Check
+    - name: Locate ninja.exe on disk
+      run: |
+        echo Searching for ninja.exe...
+        Get-ChildItem -Path "C:\Program Files", "C:\Program Files (x86)" -Recurse -Filter ninja.exe -ErrorAction SilentlyContinue
+
+    - name: Run ninja using full path
+      run: |
+        & "C:\Program Files\Ninja\ninja.exe" --version
+      continue-on-error: true
+
+    - name: Add Ninja to PATH (runtime)
+      run: |
+        echo "Adding Ninja to PATH..."
+        $env:Path = "C:\Program Files\Ninja;$env:Path"
+        [System.Environment]::SetEnvironmentVariable("PATH", $env:Path, "Process")
+        ninja --version
+
+    - name: Test CMake + Ninja Build
+      run: |
+        mkdir test-project
+        cd test-project
+        echo "cmake_minimum_required(VERSION 3.10)" > CMakeLists.txt
+        echo "project(TestApp)" >> CMakeLists.txt
+        echo "add_executable(hello hello.cpp)" >> CMakeLists.txt
+        echo "int main() { return 0; }" > hello.cpp
+        cmake -G "Ninja" .
+        ninja
