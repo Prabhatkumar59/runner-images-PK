@@ -24,19 +24,17 @@ jobs:
     name: Install and test ripgrep on Windows
     runs-on: windows-latest
     steps:
-      - name: Install ripgrep using winget
-        run: |
-          winget install --id=BurntSushi.Ripgrep -e --accept-source-agreements --accept-package-agreements
+      - name: Install ripgrep using Chocolatey
+        run: choco install ripgrep -y
 
-      - name: Add ripgrep to PATH
-        run: |
-          $rgPath = "$Env:LOCALAPPDATA\Microsoft\WinGet\Packages\BurntSushi.Ripgrep_Microsoft.Winget.Source_8wekyb3d8bbwe\rg.exe"
-          echo "##[add-path]$($rgPath | Split-Path)"  # Legacy syntax for GitHub Actions runner
+      - name: Refresh environment to use rg
+        shell: powershell
+        run: refreshenv
 
       - name: Check ripgrep version
         run: rg --version
 
       - name: Test ripgrep search
         run: |
-          echo "line with test content" > test.txt
-          rg "test" test.txt
+          echo line with test content > test.txt
+          rg test test.txt
