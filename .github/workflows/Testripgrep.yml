@@ -1,0 +1,42 @@
+name: Test ripgrep installation
+
+on: [push, pull_request]
+
+jobs:
+  ubuntu-test:
+    name: Install and test ripgrep on Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update apt and install ripgrep
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ripgrep
+
+      - name: Check ripgrep version
+        run: rg --version
+
+      - name: Test ripgrep search
+        run: |
+          echo -e "hello\nthis is a test\nripgrep test line" > test.txt
+          rg "test" test.txt
+
+  windows-test:
+    name: Install and test ripgrep on Windows
+    runs-on: windows-latest
+    steps:
+      - name: Install ripgrep using winget
+        run: |
+          winget install --id=BurntSushi.Ripgrep -e --accept-source-agreements --accept-package-agreements
+
+      - name: Add ripgrep to PATH
+        run: |
+          $rgPath = "$Env:LOCALAPPDATA\Microsoft\WinGet\Packages\BurntSushi.Ripgrep_Microsoft.Winget.Source_8wekyb3d8bbwe\rg.exe"
+          echo "##[add-path]$($rgPath | Split-Path)"  # Legacy syntax for GitHub Actions runner
+
+      - name: Check ripgrep version
+        run: rg --version
+
+      - name: Test ripgrep search
+        run: |
+          echo "line with test content" > test.txt
+          rg "test" test.txt
