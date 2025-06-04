@@ -7,7 +7,7 @@ jobs:
     name: Install and test ripgrep on Ubuntu
     runs-on: ubuntu-latest
     steps:
-      - name: Update apt and install ripgrep
+      - name: Install ripgrep via apt
         run: |
           sudo apt-get update
           sudo apt-get install -y ripgrep
@@ -15,7 +15,7 @@ jobs:
       - name: Check ripgrep version
         run: rg --version
 
-      - name: Test ripgrep search
+      - name: Test ripgrep
         run: |
           echo -e "hello\nthis is a test\nripgrep test line" > test.txt
           rg "test" test.txt
@@ -24,17 +24,13 @@ jobs:
     name: Install and test ripgrep on Windows
     runs-on: windows-latest
     steps:
-      - name: Install ripgrep using Chocolatey
+      - name: Install ripgrep via Chocolatey
         run: choco install ripgrep -y
-
-      - name: Refresh environment to use rg
-        shell: powershell
-        run: refreshenv
 
       - name: Check ripgrep version
         run: rg --version
 
-      - name: Test ripgrep search
+      - name: Test ripgrep
         run: |
           echo line with test content > test.txt
           rg test test.txt
