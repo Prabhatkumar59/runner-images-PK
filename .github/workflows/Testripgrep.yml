@@ -1,13 +1,12 @@
-name: Test ripgrep installation and size
+name: Ripgrep Runtime Install and Size Check
 
 on: [push, pull_request]
 
 jobs:
   ubuntu-test:
-    name: Install and test ripgrep on Ubuntu
     runs-on: ubuntu-latest
     steps:
-      - name: Install ripgrep via apt
+      - name: Install ripgrep
         run: |
           sudo apt-get update
           sudo apt-get install -y ripgrep
@@ -15,16 +14,15 @@ jobs:
       - name: Check ripgrep version
         run: rg --version
 
-      - name: Check size of rg binary
+      - name: Check ripgrep binary size
         run: du -h $(which rg)
 
-      - name: Test ripgrep
+      - name: Test ripgrep functionality
         run: |
-          echo -e "hello\nthis is a test\nripgrep test line" > test.txt
-          rg "test" test.txt
+          echo -e "line1\ntest line\nanother" > sample.txt
+          rg test sample.txt
 
   windows-test:
-    name: Install and test ripgrep on Windows
     runs-on: windows-latest
     steps:
       - name: Install ripgrep via Chocolatey
@@ -33,13 +31,16 @@ jobs:
       - name: Check ripgrep version
         run: rg --version
 
-      - name: Check size of rg.exe binary
+      - name: Get actual ripgrep binary size
         shell: pwsh
         run: |
-          $size = (Get-Item "C:\ProgramData\chocolatey\bin\rg.exe").Length / 1MB
-          Write-Output ("Size of rg.exe: {0:N2} MB" -f $size)
+          $installPath = "C:\ProgramData\chocolatey\lib\ripgrep\tools"
+          $totalSizeBytes = (Get-ChildItem -Recurse $installPath | Measure-Object -Property Length -Sum).Sum
+          $totalSizeMB = "{0:N2} MB" -f ($totalSizeBytes / 1MB)
+          Write-Output "Actual ripgrep install size: $totalSizeMB"
 
-      - name: Test ripgrep
+      - name: Test ripgrep functionality
         run: |
-          echo line with test content > test.txt
+          echo line1 > test.txt
+          echo test match >> test.txt
           rg test test.txt
