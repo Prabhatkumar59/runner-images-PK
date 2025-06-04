@@ -1,4 +1,4 @@
-name: Test ripgrep installation
+name: Test ripgrep installation and size
 
 on: [push, pull_request]
 
@@ -15,6 +15,9 @@ jobs:
       - name: Check ripgrep version
         run: rg --version
 
+      - name: Check size of rg binary
+        run: du -h $(which rg)
+
       - name: Test ripgrep
         run: |
           echo -e "hello\nthis is a test\nripgrep test line" > test.txt
@@ -29,6 +32,12 @@ jobs:
 
       - name: Check ripgrep version
         run: rg --version
+
+      - name: Check size of rg.exe binary
+        shell: pwsh
+        run: |
+          $size = (Get-Item "C:\ProgramData\chocolatey\bin\rg.exe").Length / 1MB
+          Write-Output ("Size of rg.exe: {0:N2} MB" -f $size)
 
       - name: Test ripgrep
         run: |
