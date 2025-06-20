@@ -1,0 +1,26 @@
+name: Repro Missing Dependencies on Ubuntu 24.04
+
+on:[push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install prerequisites (no mono-complete, no libltdl-dev)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake curl unzip pkg-config
+
+      - name: Setup vcpkg
+        run: |
+          git clone https://github.com/microsoft/vcpkg.git
+          ./vcpkg/bootstrap-vcpkg.sh
+
+      - name: Run CMake configure step with vcpkg manifest mode
+        run: |
+          mkdir build && cd build
+          cmake .. -DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake
