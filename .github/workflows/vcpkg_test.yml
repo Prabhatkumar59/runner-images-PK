@@ -1,6 +1,7 @@
 name: Repro Missing Dependencies on Ubuntu 24.04
 
-on:[push, pull_request]
+on:
+  push
 
 jobs:
   build:
