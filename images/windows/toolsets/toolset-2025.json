@@ -329,12 +329,12 @@
         }
     },
     "openssl": {
-        "version": "3.4.1",
+        "version": "3.5.1",
         "pinnedDetails": {
-            "link": "https://github.com/actions/runner-images-internal/pull/6702",
-            "reason": "Meaningful reason must be added at next update.",
-            "review-at": "2025-06-01",
-            "type": "preexisting-pinned-version-without-reason"
+            "link": "TBD",
+            "reason": "Testing OpenSSL 3.5.1 upgrade before submitting PR. Upgrade to LTS version for improved support.",
+            "review-at": "2026-01-01",
+            "type": "version-upgrade"
         }
     },
     "pwsh": {
