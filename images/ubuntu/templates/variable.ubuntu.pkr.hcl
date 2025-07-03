@@ -96,7 +96,7 @@ variable "private_virtual_network_with_public_ip" {
 }
 variable "os_disk_size_gb" {
   type    = number
-  default = null
+  default = 90
 }
 variable "source_image_version" {
   type    = string
