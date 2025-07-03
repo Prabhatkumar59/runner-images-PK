@@ -128,6 +128,31 @@ Install-AndroidSDKPackages ($androidToolset.extras | ForEach-Object { "extras;$_
 Install-AndroidSDKPackages ($androidToolset.addons | ForEach-Object { "add-ons;$_" })
 Install-AndroidSDKPackages ($androidToolset.additional_tools)
 
+Write-Host "Performing disk cleanup before NDK installation..."
+
+# Clear Windows temporary directories
+Remove-Item -Path "C:\Windows\Temp\*" -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item -Path "$env:TEMP\*" -Recurse -Force -ErrorAction SilentlyContinue
+
+# Remove unused Android SDK tools that may have been pre-installed by other components
+$existingPlatformTools = Join-Path -Path $SDKInstallRoot -ChildPath "platform-tools"
+if (Test-Path $existingPlatformTools) {
+    Write-Host "Removing redundant platform-tools to free space..."
+    Remove-Item $existingPlatformTools -Recurse -Force
+}
+
+# Optionally clean up other unnecessary directories
+# Remove Visual Studio Android NDK if already installed (free ~8GB)
+$vsNdkPath = "C:\Microsoft\AndroidNDK64"
+if (Test-Path $vsNdkPath) {
+    Write-Host "Removing Visual Studio Android NDK..."
+    Remove-Item -Path $vsNdkPath -Recurse -Force
+}
+
+# Check remaining space
+Write-Host "Disk usage before NDK install:"
+Get-PSDrive -PSProvider FileSystem | Sort-Object Used -Descending
+
 # Install NDKs
 $ndkMajorVersions = $androidToolset.ndk.versions
 $ndkDefaultMajorVersion = $androidToolset.ndk.default
