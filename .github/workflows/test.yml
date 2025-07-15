@@ -1,0 +1,26 @@
+name: Install Terraform on Ubuntu 24.04
+
+on: [push, pull_request]
+
+jobs:
+  install-terraform:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set Terraform version
+        run: echo "TERRAFORM_VERSION=1.8.5" >> $GITHUB_ENV
+
+      - name: Install unzip & curl
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y unzip curl
+
+      - name: Download and install Terraform
+        run: |
+          curl -fsSL https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip -o terraform.zip
+          unzip terraform.zip
+          sudo mv terraform /usr/local/bin/
+          terraform -version
