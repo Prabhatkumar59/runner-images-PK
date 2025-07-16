@@ -215,7 +215,7 @@ Describe "Selenium" {
     }
 }
 
-Describe "Terraform" -Skip:((-not (Test-IsUbuntu22))) {
+Describe "Terraform" {
     It "terraform" {
         "terraform --version" | Should -ReturnZeroExitCode
     }
