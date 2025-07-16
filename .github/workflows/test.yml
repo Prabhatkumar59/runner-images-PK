@@ -1,35 +1,34 @@
-name: Install Terraform v1.12.2 on Ubuntu 24.04
+name: Install Terraform v1.12.2 (OpenTofu) on ubuntu-24.04
 
 on:
   push
-
 jobs:
   install-terraform:
     runs-on: ubuntu-24.04
 
     steps:
-      - name: Install required packages
+      - name: Install required tools
         run: |
           sudo apt-get update
           sudo apt-get install -y unzip curl
 
-      - name: Download and install Terraform (OpenTofu v1.12.2)
+      - name: Download and install OpenTofu v1.12.2 (as terraform)
         run: |
-          echo "🔄 Fetching latest OpenTofu (Terraform fork) release..."
-          curl -s https://api.github.com/repos/opentofu/opentofu/releases/latest \
-            | grep "browser_download_url.*linux_amd64.zip" \
-            | cut -d '"' -f 4 \
-            | xargs curl -sSL -o terraform.zip
+          TOFU_VERSION="1.12.2"
+          echo "🔄 Downloading OpenTofu v${TOFU_VERSION}..."
 
-          echo "📦 Unzipping..."
+          curl -sSL -o terraform.zip \
+            https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.zip
+
+          echo "📦 Unzipping and installing..."
           unzip terraform.zip
           mv tofu terraform
           chmod +x terraform
           sudo mv terraform /usr/local/bin/terraform
 
-      - name: Check Terraform version
+      - name: Check installed Terraform version
         run: |
-          echo "✅ Terraform version:"
+          echo "✅ Terraform version installed:"
           terraform version
 
       - name: Check Terraform binary size
