@@ -1,0 +1,42 @@
+name: Build PHP 8.2 Docker Image with APT Packages
+
+on:
+   push
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create Dockerfile
+        run: |
+          cat <<EOF > Dockerfile
+          FROM php:8.2
+
+          RUN apt-get update && apt-get install -y --no-install-recommends \
+              libfreetype6 \
+              zlib1g-dev \
+              libjpeg-dev \
+              libpng-dev \
+              unzip \
+              git \
+              subversion \
+            && rm -rf /var/lib/apt/lists/*
+          EOF
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        run: |
+          docker buildx build \
+            --platform linux/amd64 \
+            --file ./Dockerfile \
+            --tag php82-custom:latest \
+            --load .
+
+      - name: Run container to verify
+        run: docker run --rm php82-custom:latest php -v
