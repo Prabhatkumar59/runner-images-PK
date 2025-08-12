@@ -254,7 +254,7 @@
     "serviceFabric": {
         "runtime": {
             "version": "10.1.2493.9590",
-            "checksum": "09C63A971BACDE338282C73B3C9174BED9AAD53E1D3A1B73D44515852C9C00CF"
+            "checksum": "3959C9AFDDDEC163CCCD2B245F1736DD7AB11178787FC24D7D2D213FCE259686"
         },
         "sdk": {
             "version": "7.1.2493",
